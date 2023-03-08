@@ -1,0 +1,21 @@
+######/bet
+POST http://localhost:8080/cars/v1/bet
+Accept: application/json
+Content-Type: application/json
+
+{
+  "request_ref": "2402TestRequestRef1337",
+  "client_id": 7,
+  "car_brand": "audi",
+  "amount": 1200
+}
+
+######/bet
+POST http://localhost:8080/cars/v1/total-info
+Accept: application/json
+Content-Type: application/json
+
+{
+  "request_ref": "2402TestRequestRef1337",
+  "car_brand": "bmw"
+}
