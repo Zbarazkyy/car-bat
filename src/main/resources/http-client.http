@@ -14,5 +14,5 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "car_brand": "bmw"
+  "car_brand": null
 }

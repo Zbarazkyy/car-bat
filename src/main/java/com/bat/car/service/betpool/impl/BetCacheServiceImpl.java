@@ -20,7 +20,7 @@ public class BetCacheServiceImpl implements BetCacheService {
     @PostConstruct
     private void init() {
         Arrays.stream(CarBrandEnum.values())
-                .forEach(brand -> betCache.put(brand.getBrand(), Double.NaN));
+                .forEach(brand -> betCache.put(brand.getBrand(), Double.valueOf(0)));
     }
 
 
