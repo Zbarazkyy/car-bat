@@ -3,7 +3,6 @@ package com.bat.car.service.betpool.impl;
 import com.bat.car.model.client.request.SetBetRequest;
 import com.bat.car.model.enums.CarBrandEnum;
 import com.bat.car.service.betpool.BetCacheService;
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,40 +11,36 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BetCacheServiceImpl implements BetCacheService {
-    private Map<CarBrandEnum, Map<Long, BigDecimal>> betCache;
+    private Map<String, Double> betCache;
+
+    public BetCacheServiceImpl() {
+        this.betCache = new ConcurrentHashMap<>();
+    }
 
     @PostConstruct
     private void init() {
-        betCache = new ConcurrentHashMap<>();
-        Arrays.stream(CarBrandEnum.values()).forEach(brand -> betCache.put(brand, new ConcurrentHashMap<>()));
+        Arrays.stream(CarBrandEnum.values())
+                .forEach(brand -> betCache.put(brand.getBrand(), Double.NaN));
     }
+
 
     @Override
     public void setBet(SetBetRequest request) {
         if (betCache.containsKey(request.getCarBrand())) {
-            Map<Long, BigDecimal> betCacheByBrand = betCache.get(request.getCarBrand());
-            if (betCacheByBrand.containsKey(request.getClientId())) {
-                BigDecimal totalBetByClient = betCacheByBrand.get(request.getClientId()).add(request.getAmount());
-                betCacheByBrand.put(request.getClientId(), totalBetByClient);
-                return;
-            }
-            betCacheByBrand.put(request.getClientId(), request.getAmount());
-            betCache.put(request.getCarBrand(), betCacheByBrand);
+            Double amount = betCache.get(request.getCarBrand()) + request.getAmount();
+            betCache.put(request.getCarBrand(), amount);
+            return;
         }
+        betCache.put(request.getCarBrand(), request.getAmount());
     }
 
     @Override
-    public BigDecimal getTotalBetBrand(CarBrandEnum request) {
-        Map<Long, BigDecimal> betCacheByBrand = betCache.get(request);
-        return betCacheByBrand.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+    public Map<String, Double> getTotalBetBrand(String request) {
+        return Map.of(request, betCache.get(request));
     }
 
     @Override
-    public BigDecimal getTotalByAllBrand() {
-        BigDecimal sum = BigDecimal.ZERO;
-        for (CarBrandEnum value : CarBrandEnum.values()) {
-            sum = sum.add(getTotalBetBrand(value));
-        }
-        return sum;
+    public Map<String, Double> getTotalByAllBrand() {
+        return betCache;
     }
 }
